@@ -1,0 +1,309 @@
+---
+title: "Naglis Bukauskas Final Assignment"
+author: "Naglis Bukauskas"
+date: "4/26/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+install.packages("plm")
+install.packages("car")
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+
+setwd("C:/Users/nagli/OneDrive/Desktop")
+
+co2df <- read.csv(url("https://raw.githubusercontent.com/owid/co2-data/master/owid-co2-data.csv"))
+gdpdf <- read.csv(file = "gdpdata.csv", fileEncoding = 'UTF-8-BOM')
+
+
+```
+
+Initial Formatting
+
+``` {r}
+summary(co2df)
+summary(gdpdf)
+
+cp2dflargerspans <- co2df
+
+cp2dflargerspans <- cp2dflargerspans[cp2dflargerspans$year >= 1990,]
+cp2dflargerspans <- cp2dflargerspans[cp2dflargerspans$year <= 2010,]
+cp2dflargerspans <- cp2dflargerspans[!(is.na(cp2dflargerspans$iso_code) | cp2dflargerspans$iso_code==""), ]
+cp2dflargerspans <- cp2dflargerspans[!(is.na(cp2dflargerspans$co2) | cp2dflargerspans$co2==""), ]
+
+gdpdflargerspans <- gdpdf
+
+gdpdflargerspans = subset(gdpdflargerspans, select = c(Country.Name, Country.Code, X1990, X1991, X1992, X1993, X1994, X1995, X1996, X1997, X1998, X1999, X2000, X2001, X2002, X2003, X2004, X2005, X2006, X2007, X2008, X2009, X2010))
+gdpdflargerspans <- gdpdflargerspans[!(is.na(gdpdflargerspans$X1990) | gdpdflargerspans$X1990==""),] 
+gdpdflargerspans <- gdpdflargerspans[!(is.na(gdpdflargerspans$X1991) | gdpdflargerspans$X1991==""),]
+gdpdflargerspans <- gdpdflargerspans[!(is.na(gdpdflargerspans$X1992) | gdpdflargerspans$X1992==""),]
+gdpdflargerspans <- gdpdflargerspans[!(is.na(gdpdflargerspans$X1993) | gdpdflargerspans$X1993==""),]
+gdpdflargerspans <- gdpdflargerspans[!(is.na(gdpdflargerspans$X1994) | gdpdflargerspans$X1994==""),]
+gdpdflargerspans <- gdpdflargerspans[!(is.na(gdpdflargerspans$X1995) | gdpdflargerspans$X1995==""),]
+gdpdflargerspans <- gdpdflargerspans[!(is.na(gdpdflargerspans$X1996) | gdpdflargerspans$X1996==""),]
+gdpdflargerspans <- gdpdflargerspans[!(is.na(gdpdflargerspans$X1997) | gdpdflargerspans$X1997==""),]
+gdpdflargerspans <- gdpdflargerspans[!(is.na(gdpdflargerspans$X1998) | gdpdflargerspans$X1998==""),]
+gdpdflargerspans <- gdpdflargerspans[!(is.na(gdpdflargerspans$X1999) | gdpdflargerspans$X1999==""),]
+gdpdflargerspans <- gdpdflargerspans[!(is.na(gdpdflargerspans$X2000) | gdpdflargerspans$X2000==""),]
+gdpdflargerspans <- gdpdflargerspans[!(is.na(gdpdflargerspans$X2001) | gdpdflargerspans$X2001==""),]
+gdpdflargerspans <- gdpdflargerspans[!(is.na(gdpdflargerspans$X2002) | gdpdflargerspans$X2002==""),]
+gdpdflargerspans <- gdpdflargerspans[!(is.na(gdpdflargerspans$X2003) | gdpdflargerspans$X2003==""),]
+gdpdflargerspans <- gdpdflargerspans[!(is.na(gdpdflargerspans$X2004) | gdpdflargerspans$X2004==""),]
+gdpdflargerspans <- gdpdflargerspans[!(is.na(gdpdflargerspans$X2005) | gdpdflargerspans$X2005==""),]
+gdpdflargerspans <- gdpdflargerspans[!(is.na(gdpdflargerspans$X2006) | gdpdflargerspans$X2006==""),]
+gdpdflargerspans <- gdpdflargerspans[!(is.na(gdpdflargerspans$X2007) | gdpdflargerspans$X2007==""),]
+gdpdflargerspans <- gdpdflargerspans[!(is.na(gdpdflargerspans$X2008) | gdpdflargerspans$X2008==""),]
+gdpdflargerspans <- gdpdflargerspans[!(is.na(gdpdflargerspans$X2009) | gdpdflargerspans$X2009==""),]
+gdpdflargerspans <- gdpdflargerspans[!(is.na(gdpdflargerspans$X2010) | gdpdflargerspans$X2010==""),]
+
+gdpdflargerspans <- gdpdflargerspans %>% 
+  rename(
+    country = Country.Name,
+    iso_code = Country.Code,
+    "1990" = X1990,
+    "1991" = X1991,
+    "1992" = X1992,
+    "1993" = X1993,
+    "1994" = X1994,
+    "1995" = X1995,
+    "1996" = X1996,
+    "1997" = X1997,
+    "1998" = X1998,
+    "1999" = X1999,
+    "2000" = X2000,
+    "2001" = X2001,
+    "2002" = X2002,
+    "2003" = X2003,
+    "2004" = X2004,
+    "2005" = X2005,
+    "2006" = X2006,
+    "2007" = X2007,
+    "2008" = X2008,
+    "2009" = X2009,
+    "2010" = X2010,
+  )
+
+
+
+co2df <- co2df[co2df$year >= 2006,]
+co2df <- co2df[co2df$year <= 2009,]
+co2df <- co2df[!(is.na(co2df$iso_code) | co2df$iso_code==""), ]
+co2df <- co2df[!(is.na(co2df$co2) | co2df$co2==""), ]
+
+gdpdf = subset(gdpdf, select = c(Country.Name, Country.Code, 
+                                 X2006, X2007, X2008, X2009))
+gdpdf <- gdpdf[!(is.na(gdpdf$X2006) | gdpdf$X2006==""),]
+gdpdf <- gdpdf[!(is.na(gdpdf$X2007) | gdpdf$X2007==""),]
+gdpdf <- gdpdf[!(is.na(gdpdf$X2008) | gdpdf$X2008==""),]
+gdpdf <- gdpdf[!(is.na(gdpdf$X2009) | gdpdf$X2009==""),]
+
+gdpdf <- gdpdf %>% 
+  rename(
+    country = Country.Name,
+    iso_code = Country.Code,
+    "2006" = X2006,
+    "2007" = X2007,
+    "2008" = X2008,
+    "2009" = X2009,
+    
+  )
+
+gdpdflargerspans <- pivot_longer(gdpdflargerspans, cols=3:23, names_to = "year", values_to = "gdp")
+gdpdf <- pivot_longer(gdpdf, cols=3:6, names_to = "year", values_to = "gdp")
+
+
+
+```
+
+```{r Exploratory Data Analysis}
+
+co2Emissions2006 <- co2df[co2df$year == 2006,]
+co2Emissions2006 <- co2Emissions2006[co2Emissions2006$country != "World",]
+totalCo2Emissions2006 <- sum(co2Emissions2006$co2)
+co2Emissions2006$percent <- (co2Emissions2006$co2 / totalCo2Emissions2006) * 100
+co2Emissions2006 <- co2Emissions2006 %>% relocate(percent, .after = co2)
+co2Emissions2006 <- co2Emissions2006[order(-co2Emissions2006$percent),]
+co2Emissions2006 <- co2Emissions2006 %>% slice(1:10)
+
+co2Emissions2007 <- co2df[co2df$year == 2007,]
+co2Emissions2007 <- co2Emissions2007[co2Emissions2007$country != "World",]
+totalco2Emissions2007 <- sum(co2Emissions2007$co2)
+co2Emissions2007$percent <- (co2Emissions2007$co2 / totalco2Emissions2007) * 100
+co2Emissions2007 <- co2Emissions2007 %>% relocate(percent, .after = co2)
+co2Emissions2007 <- co2Emissions2007[order(-co2Emissions2007$percent),]
+co2Emissions2007 <- co2Emissions2007 %>% slice(1:10)
+
+co2Emissions2008 <- co2df[co2df$year == 2008,]
+co2Emissions2008 <- co2Emissions2008[co2Emissions2008$country != "World",]
+totalco2Emissions2008 <- sum(co2Emissions2008$co2)
+co2Emissions2008$percent <- (co2Emissions2008$co2 / totalco2Emissions2008) * 100
+co2Emissions2008 <- co2Emissions2008 %>% relocate(percent, .after = co2)
+co2Emissions2008 <- co2Emissions2008[order(-co2Emissions2008$percent),]
+co2Emissions2008 <- co2Emissions2008 %>% slice(1:10)
+
+co2Emissions2009 <- co2df[co2df$year == 2009,]
+co2Emissions2009 <- co2Emissions2009[co2Emissions2009$country != "World",]
+totalco2Emissions2009 <- sum(co2Emissions2009$co2)
+co2Emissions2009$percent <- (co2Emissions2009$co2 / totalco2Emissions2009) * 100
+co2Emissions2009 <- co2Emissions2009 %>% relocate(percent, .after = co2)
+co2Emissions2009 <- co2Emissions2009[order(-co2Emissions2009$percent),]
+co2Emissions2009 <- co2Emissions2009 %>% slice(1:10)
+
+ggplot(data = co2Emissions2006, aes(x = reorder(country, -percent), y = percent, fill=percent)) + 
+  ggtitle("Percent of Global Co2 Emissions by Country in 2006") +
+  xlab("Country") +
+  ylab("Percent of Global Co2 Emissions") +
+   scale_y_continuous(limits = c(0, 30)) +
+  geom_bar(stat = "identity", width = 0.5) +
+  geom_text(aes(label=paste0(format(round(percent, 2), nsmall = 2),"%")), position=position_dodge(width=0.9), vjust=-0.25, hjust=0, angle = 45) +
+  theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5))
+
+ggplot(data = co2Emissions2007, aes(x = reorder(country, -percent), y = percent, fill=percent)) + 
+  ggtitle("Percent of Global Co2 Emissions by Country in 2007") +
+  xlab("Country") +
+  ylab("Percent of Global Co2 Emissions") +
+   scale_y_continuous(limits = c(0, 30)) +
+  geom_bar(stat = "identity", width = 0.5) +
+  geom_text(aes(label=paste0(format(round(percent, 2), nsmall = 2),"%")), position=position_dodge(width=0.9), vjust=-0.25, hjust=0, angle = 45) +
+  theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5))
+
+ggplot(data = co2Emissions2008, aes(x = reorder(country, -percent), y = percent, fill=percent)) + 
+  ggtitle("Percent of Global Co2 Emissions by Country in 2008") +
+  xlab("Country") +
+  ylab("Percent of Global Co2 Emissions") +
+   scale_y_continuous(limits = c(0, 30)) +
+  geom_bar(stat = "identity", width = 0.5) +
+  geom_text(aes(label=paste0(format(round(percent, 2), nsmall = 2),"%")), position=position_dodge(width=0.9), vjust=-0.25, hjust=0, angle = 45) +
+  theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5))
+
+ggplot(data = co2Emissions2009, aes(x = reorder(country, -percent), y = percent, fill=percent)) + 
+  ggtitle("Percent of Global Co2 Emissions by Country in 2009") +
+  xlab("Country") +
+  ylab("Percent of Global Co2 Emissions") +
+   scale_y_continuous(limits = c(0, 30)) +
+  geom_bar(stat = "identity", width = 0.5) +
+  geom_text(aes(label=paste0(format(round(percent, 2), nsmall = 2),"%")), position=position_dodge(width=0.9), vjust=-0.25, hjust=0, angle = 45) +
+  theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5))
+
+
+```
+``` {r Largest Change in co2 Emissions} 
+
+co2GrowthPercentage2006 <- co2df[co2df$year == 2006,]
+co2GrowthPercentage2006 <- co2GrowthPercentage2006[co2GrowthPercentage2006$country != "World",]
+co2GrowthPercentage2006 <- co2GrowthPercentage2006[order(co2GrowthPercentage2006$co2_growth_prct),]
+co2GrowthPercentage2006 <- co2GrowthPercentage2006 %>% slice(1:10)
+
+co2GrowthPercentage2007 <- co2df[co2df$year == 2007,]
+co2GrowthPercentage2007 <- co2GrowthPercentage2007[co2GrowthPercentage2007$country != "World",]
+co2GrowthPercentage2007 <- co2GrowthPercentage2007[order(co2GrowthPercentage2007$co2_growth_prct),]
+co2GrowthPercentage2007 <- co2GrowthPercentage2007 %>% slice(1:10)
+
+co2GrowthPercentage2008 <- co2df[co2df$year == 2008,]
+co2GrowthPercentage2008 <- co2GrowthPercentage2008[co2GrowthPercentage2008$country != "World",]
+co2GrowthPercentage2008 <- co2GrowthPercentage2008[order(co2GrowthPercentage2008$co2_growth_prct),]
+co2GrowthPercentage2008 <- co2GrowthPercentage2008 %>% slice(1:10)
+
+co2GrowthPercentage2009 <- co2df[co2df$year == 2009,]
+co2GrowthPercentage2009 <- co2GrowthPercentage2009[co2GrowthPercentage2009$country != "World",]
+co2GrowthPercentage2009 <- co2GrowthPercentage2009[order(co2GrowthPercentage2009$co2_growth_prct),]
+co2GrowthPercentage2009 <- co2GrowthPercentage2009 %>% slice(1:10)
+
+ggplot(data = co2GrowthPercentage2006, aes(x = reorder(country, co2_growth_prct), y = -co2_growth_prct, fill=co2_growth_prct)) + 
+  ggtitle("Decrease of Co2 Emissions Between 2005 and 2006") +
+  xlab("Country") +
+  ylab("Precent of Co2 Decrease") +
+   scale_y_continuous(limits = c(0, 60)) +
+  geom_bar(stat = "identity", width = 0.5) +
+  geom_text(aes(label=paste0(format(round(co2_growth_prct, 2), nsmall = 2),"%")), position=position_dodge(width=0.9), vjust=-0.25, hjust=0, angle = 45) +
+  theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5))
+
+ggplot(data = co2GrowthPercentage2007, aes(x = reorder(country, co2_growth_prct), y = -co2_growth_prct, fill=co2_growth_prct)) + 
+  ggtitle("Decrease of Co2 Emissions Between 2006 and 2007") +
+  xlab("Country") +
+  ylab("Precent of Co2 Decrease") +
+   scale_y_continuous(limits = c(0, 60)) +
+  geom_bar(stat = "identity", width = 0.5) +
+  geom_text(aes(label=paste0(format(round(co2_growth_prct, 2), nsmall = 2),"%")), position=position_dodge(width=0.9), vjust=-0.25, hjust=0, angle = 45) +
+  theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5))
+
+ggplot(data = co2GrowthPercentage2008, aes(x = reorder(country, co2_growth_prct), y = -co2_growth_prct, fill=co2_growth_prct)) + 
+  ggtitle("Decrease of Co2 Emissions Between 2007 and 2008") +
+  xlab("Country") +
+  ylab("Precent of Co2 Decrease") +
+   scale_y_continuous(limits = c(0, 60)) +
+  geom_bar(stat = "identity", width = 0.5) +
+  geom_text(aes(label=paste0(format(round(co2_growth_prct, 2), nsmall = 2),"%")), position=position_dodge(width=0.9), vjust=-0.25, hjust=0, angle = 45) +
+  theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5))
+
+ggplot(data = co2GrowthPercentage2009, aes(x = reorder(country, co2_growth_prct), y = -co2_growth_prct, fill=co2_growth_prct)) + 
+  ggtitle("Decrease of Co2 Emissions Between 2008 and 2009") +
+  xlab("Country") +
+  ylab("Precent of Co2 Decrease") +
+   scale_y_continuous(limits = c(0, 60)) +
+  geom_bar(stat = "identity", width = 0.5) +
+  geom_text(aes(label=paste0(format(round(co2_growth_prct, 2), nsmall = 2),"%")), position=position_dodge(width=0.9), vjust=-0.25, hjust=0, angle = 45) +
+  theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5))
+
+
+
+```
+``` {r Regression}
+
+
+
+```
+
+
+```{r 2}
+library(plm)
+library(foreign)
+library(car)
+
+
+total <- merge(co2df,gdpdf,by=c("iso_code","country","year"))
+total = subset(total, select= c(iso_code, country, year, co2, gdp.x))
+total <- total %>% relocate(gdp.x, .after = co2)
+total <- total[order(-total$gdp.x),]
+
+plmregression <-plm(gdp.x ~ co2, data = total, index=c("country", "year"),)
+summary(plmregression)
+
+LM2007 <- total
+LM2007 <- LM2007[co2df$year == 2007,]
+summary(lm(gdp.x ~ co2, data = LM2007))
+
+LM2008 <- total
+LM2008 <- LM2008[co2df$year == 2008,]
+summary(lm(gdp.x ~ co2, data = LM2008))
+
+
+plot2007 <- total[total$year == 2007,]
+ggplot(plot2007, aes(x=gdp.x, y=co2)) + geom_point() +   geom_smooth(method=lm)
+
+plot2008 <- total[total$year == 2008,]
+ggplot(plot2008, aes(x=gdp.x, y=co2)) + geom_point() +   geom_smooth(method=lm)
+
+
+
+massivetotal <- merge(cp2dflargerspans,gdpdflargerspans,by=c("iso_code","country","year"))
+massivetotal = subset(massivetotal, select= c(iso_code, country, year, co2, gdp.x))
+massivetotal <- massivetotal %>% relocate(gdp.x, .after = co2)
+massivetotal <- massivetotal[order(-massivetotal$gdp.x),]
+massivetotal <- massivetotal %>% slice(1:150)
+
+scatterplot(co2 ~ year|country, boxplots = FALSE, smooth = TRUE, data = massivetotal)
+
+
+```
+
+``` {r Panel Regression}
+
+
+plmregression <-plm(gdp.x ~ co2, data = total, index=c("country", "year"),)
+summary(plmregression)
+
+```
